@@ -12,6 +12,7 @@ from src.svd.model import SVDReconciler
 from src.svd.matcher import SVDMatchingEngine
 from src.embedding.model import TransformerModel
 from src.embedding.matcher import MLMatchingEngine
+from src.demos import run_svd_progress_demo, run_embedding_demo
 
 logger = setup_logger("CLI")
 app = typer.Typer(help="Financial Reconciliation System CLI", add_completion=False)
@@ -28,6 +29,7 @@ def reconcile(model: str = typer.Option("SVD", help="Model type: 'SVD' (Option A
         logger.error(e)
         return
 
+    # 1. Unique Match (Core 2.1)
     unique_matcher = UniqueAmountMatcher(bank_df, reg_df)
     matches_unique, rem_bank, rem_reg = unique_matcher.find_matches()
     
@@ -39,6 +41,7 @@ def reconcile(model: str = typer.Option("SVD", help="Model type: 'SVD' (Option A
         train_reg = reg_df.loc[matches_unique['reg_idx'], 'description']
         
         if model.upper() == "SVD":
+            # Alignment + SVD
             alignment = AlignmentModel()
             if len(train_bank) > 0:
                 alignment.fit(train_bank, train_reg)
@@ -46,6 +49,7 @@ def reconcile(model: str = typer.Option("SVD", help="Model type: 'SVD' (Option A
                 _, all_reg_vec = alignment.transform([], reg_df['description'])
             else:
                 logger.warning("No training data for Alignment. Using Raw LSA.")
+                # Fallback logic
                 extractor = TermExtractor()
                 all_text = pd.concat([bank_df['description'], reg_df['description']])
                 extractor.fit(all_text)
@@ -107,7 +111,18 @@ def test():
     """
     import pytest
     logger.info("Running all unit tests...")
+    # Point to main/tests directory
     pytest.main(["-v", "main/tests/"])
+
+@app.command()
+def demo_svd():
+    """Run SVD Progress Demo"""
+    run_svd_progress_demo()
+
+@app.command()
+def demo_embedding():
+    """Run Embedding Progress Demo"""
+    run_embedding_demo()
 
 if __name__ == "__main__":
     app()

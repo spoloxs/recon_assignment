@@ -6,9 +6,12 @@ from src.common.alignment import AlignmentModel
 from src.svd.model import SVDReconciler
 from src.svd.matcher import SVDMatchingEngine
 from src.common.config import SVD_COMPONENTS
+from src.common.logger import setup_logger
+
+logger = setup_logger("SVDMethod")
 
 def get_unique_matches(bank_df, reg_df):
-    print("Finding unique amount matches...")
+    logger.info("Finding unique amount matches...")
     bc = bank_df['amount'].value_counts()
     rc = reg_df['amount'].value_counts()
     unique = bc[bc==1].index.intersection(rc[rc==1].index)
@@ -26,7 +29,7 @@ def main():
     
     train_df = get_unique_matches(bank_df, reg_df)
     total_train = len(train_df)
-    print(f"Total available training data: {total_train} pairs")
+    logger.info(f"Total available training data: {total_train} pairs")
     
     fractions = [0.33, 0.66, 1.0]
     
@@ -34,7 +37,7 @@ def main():
         n_samples = int(total_train * frac)
         current_train = train_df.iloc[:n_samples]
         
-        print(f"\n--- Iteration {i+1}: Training with {n_samples} pairs ({int(frac*100)}%) ---")
+        logger.info(f"--- Iteration {i+1}: Training with {n_samples} pairs ({int(frac*100)}%) ---")
         
         alignment = AlignmentModel()
         alignment.fit(current_train['description_bank'], current_train['description_reg'])
@@ -51,7 +54,7 @@ def main():
         matcher = SVDMatchingEngine(bank_df, reg_df, bank_svd, reg_svd)
         matches = matcher.run()
         
-        print(f"SVD Matcher found {len(matches)} matches")
+        logger.info(f"SVD Matcher found {len(matches)} matches")
         evaluate_results(matches, bank_df, reg_df)
 
 if __name__ == "__main__":

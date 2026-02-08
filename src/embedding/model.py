@@ -26,7 +26,7 @@ class TransformerModel:
     
         self.model.fit(train_objectives=[(train_dataloader, train_loss)], epochs=epochs, show_progress_bar=False)
                 
-        print("Fine-tuning complete.")
+        logger.info("Fine-tuning complete.")
 
     def transform(self, texts):
         if hasattr(texts, 'tolist'):

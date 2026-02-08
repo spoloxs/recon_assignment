@@ -43,9 +43,9 @@ class UniqueAmountMatcher:
             date_diff = (b_row['date'] - r_row['date']).days
             
             flag = None
-            if abs(date_diff) > UNIQUE_DATE_TOLERANCE:
+            if abs(date_diff) > 0:
                 flag = f"Date diff: {date_diff}"
-                logger.warning(f"Flagged match Amount {amt}: {flag}")
+                # logger.warning(f"Flagged match Amount {amt}: {flag}")
             
             matches.append({
                 'bank_idx': b_idx,

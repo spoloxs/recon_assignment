@@ -1,5 +1,8 @@
 import numpy as np
 from sklearn.feature_extraction.text import CountVectorizer
+from .logger import setup_logger
+
+logger = setup_logger("AlignmentModel")
 
 class AlignmentModel:
     def __init__(self):
@@ -8,7 +11,7 @@ class AlignmentModel:
         self.alignment_matrix = None
 
     def fit(self, bank_docs, reg_docs):
-        print("Calculating Mutual Information (Alignment)...")
+        logger.info("Calculating Mutual Information (Alignment)...")
         self.bank_vectorizer.fit(bank_docs)
         self.reg_vectorizer.fit(reg_docs)
         

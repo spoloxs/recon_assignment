@@ -1,4 +1,8 @@
 import pandas as pd
+from .logger import setup_logger
+
+logger = setup_logger("Evaluator")
+
 def evaluate_results(matches, bank, reg):
     """
     Computes performance metrics based on simulated ground truth (Considering the ids corresponds to ground truth).
@@ -28,9 +32,9 @@ def evaluate_results(matches, bank, reg):
     recall = true_positives / (true_positives + false_negatives) if (true_positives + false_negatives) > 0 else 0
     f1 = 2 * (precision * recall) / (precision + recall) if (precision + recall) > 0 else 0
     
-    print("--- Performance Report ---")
-    print(f"Matches Proposed: {len(predictions)}")
-    print(f"Correct Matches:  {true_positives}")
-    print(f"Precision:        {precision:.2%}")
-    print(f"Recall:           {recall:.2%}")
-    print(f"F1 Score:         {f1:.2%}")
+    logger.info("--- Performance Report ---")
+    logger.info(f"Matches Proposed: {len(predictions)}")
+    logger.info(f"Correct Matches:  {true_positives}")
+    logger.info(f"Precision:        {precision:.2%}")
+    logger.info(f"Recall:           {recall:.2%}")
+    logger.info(f"F1 Score:         {f1:.2%}")

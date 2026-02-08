@@ -91,7 +91,7 @@ class MLMatchingEngine:
                 if date_diff < 0: date_score = 0.5 / (1.0 + abs(date_diff))
                 else: date_score = 1.0 / (1.0 + abs(date_diff))
                 
-                final_score = 0.5*amount_score + 0.4*text_score + 0.1*date_score
+                final_score = 0.45*amount_score + 0.45*text_score + 0.1*date_score
                 
                 if final_score > MIN_CONFIDENCE:
                     all_candidates.append({
