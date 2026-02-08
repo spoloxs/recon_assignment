@@ -44,7 +44,7 @@ $$ Cell_{i,j} = P(bank\_term_i, reg\_term_j) \times \log \left( \frac{P(bank\_te
 
 #### Explained Code:
 ```python
-amount_score = 1.0 / (1.0 + rel_diff * 100)
+amount_score = 1.0 / (1.0 + rel_diff * 20)
 ```
 - **Why?** This function creates a sharp drop-off for amount differences.
 - If `rel_diff` is 1% (0.01), score drops to 0.5.
