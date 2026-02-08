@@ -5,11 +5,11 @@ import os
 import torch
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from models import TransformerModel
+from src.embedding.model import TransformerModel
 
 class TestModels(unittest.TestCase):
 
-    @patch('models.SentenceTransformer')
+    @patch('src.embedding.model.SentenceTransformer')
     def test_transform(self, mock_transformer):
         # Mock encode
         mock_instance = mock_transformer.return_value
@@ -21,9 +21,9 @@ class TestModels(unittest.TestCase):
         mock_instance.encode.assert_called_once()
         self.assertEqual(result, [[0.1, 0.2]])
 
-    @patch('models.SentenceTransformer')
-    @patch('models.DataLoader')
-    @patch('models.losses.CosineSimilarityLoss')
+    @patch('src.embedding.model.SentenceTransformer')
+    @patch('src.embedding.model.DataLoader')
+    @patch('src.embedding.model.losses.CosineSimilarityLoss')
     def test_fit(self, mock_loss, mock_dataloader, mock_transformer):
         mock_instance = mock_transformer.return_value
         # Mock fit

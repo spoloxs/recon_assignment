@@ -1,7 +1,7 @@
 from sentence_transformers import SentenceTransformer, InputExample, losses
 from torch.utils.data import DataLoader
 import torch
-from config import EMBEDDING_MODEL
+from ..common.config import EMBEDDING_MODEL
 
 class TransformerModel:
     def __init__(self, model_name=EMBEDDING_MODEL):

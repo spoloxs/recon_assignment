@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
 import faiss
-from config import (
+from ..common.config import (
     MIN_CONFIDENCE, MAX_AMOUNT_DIFF_PERCENT,
     DATE_LOOKBACK_DAYS, DATE_LOOKAHEAD_DAYS, ANN_CANDIDATES
 )

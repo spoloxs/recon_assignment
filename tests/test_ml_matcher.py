@@ -5,7 +5,7 @@ import sys
 import os
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from ml_matcher import MLMatchingEngine
+from src.embedding.matcher import MLMatchingEngine
 
 class TestMLMatcher(unittest.TestCase):
 

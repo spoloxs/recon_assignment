@@ -1,7 +1,7 @@
-from data_loader import load_data
-from evaluation import evaluate_results
-from models import TransformerModel
-from ml_matcher import MLMatchingEngine
+from src.common.data_loader import load_data
+from src.common.evaluation import evaluate_results
+from src.embedding.model import TransformerModel
+from src.embedding.matcher import MLMatchingEngine
 
 if __name__ == "__main__":
     bank_df , reg_df = load_data()

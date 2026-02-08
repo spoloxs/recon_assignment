@@ -5,7 +5,7 @@ import sys
 import os
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from evaluation import evaluate_results
+from src.common.evaluation import evaluate_results
 
 class TestEvaluation(unittest.TestCase):
 

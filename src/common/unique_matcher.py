@@ -1,6 +1,6 @@
 import pandas as pd
-from data_loader import load_data
-from config import UNIQUE_DATE_TOLERANCE
+from .data_loader import load_data
+from .config import UNIQUE_DATE_TOLERANCE
 class UniqueAmountMatcher:
     def __init__(self, bank_df, reg_df):
         self.bank = bank_df

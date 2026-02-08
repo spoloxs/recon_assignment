@@ -1,7 +1,7 @@
 import pandas as pd
 import os
 import re
-from config import BANK_FILE, REGISTER_FILE
+from .config import BANK_FILE, REGISTER_FILE
 def normalize_columns(df, source_name):
     """
     Standardizes column names and formats.

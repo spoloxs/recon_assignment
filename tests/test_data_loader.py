@@ -5,7 +5,7 @@ import sys
 import os
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from data_loader import normalize_columns, load_data
+from src.common.data_loader import normalize_columns, load_data
 
 class TestDataLoader(unittest.TestCase):
 
@@ -25,8 +25,8 @@ class TestDataLoader(unittest.TestCase):
         with self.assertRaises(ValueError):
             normalize_columns(df, "Test")
 
-    @patch('data_loader.pd.read_csv')
-    @patch('data_loader.os.path.exists')
+    @patch('src.common.data_loader.pd.read_csv')
+    @patch('src.common.data_loader.os.path.exists')
     def test_load_data(self, mock_exists, mock_read_csv):
         mock_exists.return_value = True
         
