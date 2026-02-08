@@ -1,6 +1,6 @@
 import numpy as np
 import pandas as pd
-from sklearn.metrics.pairwise import cosine_similarity
+import faiss
 from config import (
     MIN_CONFIDENCE, MAX_AMOUNT_DIFF_PERCENT,
     DATE_LOOKBACK_DAYS, DATE_LOOKAHEAD_DAYS, ANN_CANDIDATES
@@ -10,8 +10,16 @@ class MLMatchingEngine:
     def __init__(self, bank_df, reg_df, bank_vectors, reg_vectors):
         self.bank = bank_df
         self.reg = reg_df
-        self.bank_vectors = bank_vectors
-        self.reg_vectors = reg_vectors
+        self.bank_vectors = bank_vectors.astype('float32')
+        self.reg_vectors = reg_vectors.astype('float32')
+        
+        d = self.reg_vectors.shape[1]
+        self.index = faiss.IndexFlatIP(d)
+        
+        # Normalize for Cosine Similarity
+        faiss.normalize_L2(self.bank_vectors)
+        faiss.normalize_L2(self.reg_vectors)
+        self.index.add(self.reg_vectors)
         
         # Pre-sort Register amounts
         self.reg_sorted_indices = np.argsort(self.reg['amount'].values)
@@ -32,11 +40,11 @@ class MLMatchingEngine:
         return 'UNKNOWN'
 
     def run(self):
-        print("Doing hybrid search (Brute Force Cosine)...")
-        # Compute full similarity matrix (N_bank x N_reg)
-        sim_matrix = cosine_similarity(self.bank_vectors, self.reg_vectors)
+        print("Doing hybrid search (FAISS ANN)...")
         
         k = ANN_CANDIDATES
+        distances, indices = self.index.search(self.bank_vectors, k)
+        
         all_candidates = []
         
         for i in range(len(self.bank)):
@@ -46,14 +54,19 @@ class MLMatchingEngine:
             bank_date = row['date']
             bank_type = self._normalize_type(row['type'])
             
-            # Get Top-K indices from similarity matrix
-            # argsort sorts ascending, so take last k and reverse
-            top_k_indices = sim_matrix[i].argsort()[-k:][::-1]
+            text_candidate_indices = indices[i]
+            text_candidate_scores = distances[i]
             
-            pool = set(top_k_indices)
-            pool.update(self._get_amount_candidates(bank_amt))
+            text_score_map = {idx: score for idx, score in zip(text_candidate_indices, text_candidate_scores)}
+            
+            amount_candidate_indices = self._get_amount_candidates(bank_amt)
+            
+            pool = set(text_candidate_indices)
+            pool.update(amount_candidate_indices)
             
             for reg_idx in pool:
+                if reg_idx == -1: continue # FAISS padding
+                
                 reg_row = self.reg.iloc[reg_idx]
                 
                 if self._normalize_type(reg_row['type']) != bank_type: continue
@@ -67,7 +80,11 @@ class MLMatchingEngine:
                 rel_diff = amt_diff / max_amt if max_amt > 0 else 0.0
                 if rel_diff > MAX_AMOUNT_DIFF_PERCENT: continue
                 
-                text_score = sim_matrix[i, reg_idx]
+                if reg_idx in text_score_map:
+                    text_score = text_score_map[reg_idx]
+                else:
+                    text_score = np.dot(self.bank_vectors[i], self.reg_vectors[reg_idx])
+                
                 amount_score = 1.0 / (1.0 + rel_diff * 20)
                 
                 if date_diff < 0: date_score = 0.5 / (1.0 + abs(date_diff))
@@ -95,7 +112,7 @@ class MLMatchingEngine:
             if c['bank_idx'] not in matched_b and c['reg_idx'] not in matched_r:
                 matched_b.add(c['bank_idx'])
                 matched_r.add(c['reg_idx'])
-                c['method'] = 'ML_EMBEDDING'
+                c['method'] = 'ML_BERT'
                 final.append(c)
         
         return pd.DataFrame(final)
