@@ -5,6 +5,9 @@ from ..common.config import (
     MIN_CONFIDENCE, MAX_AMOUNT_DIFF_PERCENT,
     DATE_LOOKBACK_DAYS, DATE_LOOKAHEAD_DAYS, ANN_CANDIDATES
 )
+from ..common.logger import setup_logger
+
+logger = setup_logger("EmbeddingMatcher")
 
 class MLMatchingEngine:
     def __init__(self, bank_df, reg_df, bank_vectors, reg_vectors):
@@ -16,12 +19,10 @@ class MLMatchingEngine:
         d = self.reg_vectors.shape[1]
         self.index = faiss.IndexFlatIP(d)
         
-        # Normalize for Cosine Similarity
         faiss.normalize_L2(self.bank_vectors)
         faiss.normalize_L2(self.reg_vectors)
         self.index.add(self.reg_vectors)
         
-        # Pre-sort Register amounts
         self.reg_sorted_indices = np.argsort(self.reg['amount'].values)
         self.reg_amounts_sorted = self.reg['amount'].values[self.reg_sorted_indices]
 
@@ -40,7 +41,7 @@ class MLMatchingEngine:
         return 'UNKNOWN'
 
     def run(self):
-        print("Doing hybrid search (FAISS ANN)...")
+        logger.info("Doing hybrid search (FAISS ANN)...")
         
         k = ANN_CANDIDATES
         distances, indices = self.index.search(self.bank_vectors, k)

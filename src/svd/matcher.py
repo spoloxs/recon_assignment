@@ -11,6 +11,9 @@ from ..common.config import (
     MIN_CONFIDENCE, MAX_AMOUNT_DIFF_PERCENT,
     DATE_LOOKBACK_DAYS, DATE_LOOKAHEAD_DAYS, ANN_CANDIDATES
 )
+from ..common.logger import setup_logger
+
+logger = setup_logger("SVDMatcher")
 
 class SVDMatchingEngine:
     def __init__(self, bank_df, reg_df, bank_vectors, reg_vectors):
@@ -46,18 +49,15 @@ class SVDMatchingEngine:
         return 'UNKNOWN'
 
     def run(self):
-        print("Running SVD Matching...")
+        logger.info("Running SVD Matching...")
         k = ANN_CANDIDATES
         
         if FAISS_AVAILABLE:
             distances, indices = self.index.search(self.bank_vectors, k)
         else:
-            print("FAISS not found, using sklearn cosine_similarity")
+            logger.warning("FAISS not found, using sklearn cosine_similarity")
             sim_matrix = cosine_similarity(self.bank_vectors, self.reg_vectors)
             indices = np.argsort(-sim_matrix, axis=1)[:, :k]
-            # distances not needed for logic below if we recompute dot product, 
-            # but for optimization we could use sim_matrix values.
-            # Here I'll recompute dot product for consistency.
         
         all_candidates = []
         
@@ -87,13 +87,11 @@ class SVDMatchingEngine:
                 
                 text_score = np.dot(self.bank_vectors[i], self.reg_vectors[reg_idx])
                 
-                # USER MODIFIED SCORE FUNCTION
                 amount_score = 1.0 / (1.0 + rel_diff * 20)
                 
                 if date_diff < 0: date_score = 0.5 / (1.0 + abs(date_diff))
                 else: date_score = 1.0 / (1.0 + abs(date_diff))
                 
-                # USER MODIFIED WEIGHTS
                 final_score = 0.5*amount_score + 0.3*text_score + 0.2*date_score
                 
                 if final_score > MIN_CONFIDENCE:

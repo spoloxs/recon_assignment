@@ -1,6 +1,10 @@
 import pandas as pd
 from .data_loader import load_data
 from .config import UNIQUE_DATE_TOLERANCE
+from .logger import setup_logger
+
+logger = setup_logger("UniqueMatcher")
+
 class UniqueAmountMatcher:
     def __init__(self, bank_df, reg_df):
         self.bank = bank_df
@@ -14,7 +18,7 @@ class UniqueAmountMatcher:
             - remaining_bank: Unmatched bank transactions.
             - remaining_reg: Unmatched register transactions.
         """
-        print("Starting Unique Amount Matching...")
+        logger.info("Starting Unique Amount Matching...")
         
         bank_counts = self.bank['amount'].value_counts()
         reg_counts = self.reg['amount'].value_counts()
@@ -23,7 +27,7 @@ class UniqueAmountMatcher:
         unique_reg_amts = reg_counts[reg_counts == 1].index
         
         common_amounts = unique_bank_amts.intersection(unique_reg_amts)
-        print(f"Found {len(common_amounts)} potential unique matches")
+        logger.info(f"Found {len(common_amounts)} potential unique matches")
         
         matches = []
         matched_bank_indices = set()
@@ -39,8 +43,9 @@ class UniqueAmountMatcher:
             date_diff = (b_row['date'] - r_row['date']).days
             
             flag = None
-            if abs(date_diff) > 0:
+            if abs(date_diff) > UNIQUE_DATE_TOLERANCE:
                 flag = f"Date diff: {date_diff}"
+                logger.warning(f"Flagged match Amount {amt}: {flag}")
             
             matches.append({
                 'bank_idx': b_idx,
@@ -63,7 +68,7 @@ class UniqueAmountMatcher:
         remaining_bank = self.bank.drop(matched_bank_indices)
         remaining_reg = self.reg.drop(matched_reg_indices)
         
-        print(f"Matched {len(matches_df)} transactions via Unique Amount.")
+        logger.info(f"Matched {len(matches_df)} transactions via Unique Amount.")
         return matches_df, remaining_bank, remaining_reg
 
 if __name__ == "__main__":

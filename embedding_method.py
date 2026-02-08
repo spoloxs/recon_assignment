@@ -6,7 +6,6 @@ from src.embedding.matcher import MLMatchingEngine
 if __name__ == "__main__":
     bank_df , reg_df = load_data()
 
-    # Before fine tuning
     print("--Running ML Matcher before fine-tuning...--")
     transformer = TransformerModel()
     bank_vecs = transformer.transform(bank_df['description'])
@@ -16,8 +15,6 @@ if __name__ == "__main__":
     print(f"ML Matcher found {len(ml_matches)} matches\n")
     evaluate_results(ml_matches, bank_df, reg_df)
 
-    # After fine tuning
-    # Using 50 epochs
     print("\n--Running ML Matcher after fine-tuning...--")
     transformer.fit(bank_df['description'], reg_df['description'], epochs=50)
     bank_vecs = transformer.transform(bank_df['description'])

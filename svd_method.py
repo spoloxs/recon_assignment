@@ -28,7 +28,6 @@ def main():
     total_train = len(train_df)
     print(f"Total available training data: {total_train} pairs")
     
-    # Run 3 Iterations with increasing training data size (33%, 66%, 100%)
     fractions = [0.33, 0.66, 1.0]
     
     for i, frac in enumerate(fractions):

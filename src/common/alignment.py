@@ -15,7 +15,6 @@ class AlignmentModel:
         B = self.bank_vectorizer.transform(bank_docs)
         R = self.reg_vectorizer.transform(reg_docs)
         
-        # Co-occurrence
         C = B.T.dot(R)
         N = len(bank_docs)
         
@@ -33,7 +32,6 @@ class AlignmentModel:
         pmi[~np.isfinite(pmi)] = 0
         pmi[pmi < 0] = 0
         
-        # Weighted PMI
         p_ab = C_dense / N
         self.alignment_matrix = p_ab * pmi
 
